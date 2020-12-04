@@ -15,6 +15,7 @@ class CreateMecanicosTable extends Migration
     {
         Schema::create('mecanicos', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->nullable()->unique();
             $table->string('nombre_completo', 50);
             $table->string('ci', 20);
             $table->string('telefono', 50);
@@ -25,6 +26,11 @@ class CreateMecanicosTable extends Migration
             $table->date('fecha_salida')->nullable();
             $table->string('src_foto', 100)->nullable();
             $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::table('mecanicos', function (Blueprint $table) {
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

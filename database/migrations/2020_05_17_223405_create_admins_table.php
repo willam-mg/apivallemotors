@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Cliente extends Migration
+class CreateAdminsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,18 @@ class Cliente extends Migration
      */
     public function up()
     {
-        Schema::create('clientes', function (Blueprint $table) {
+        Schema::create('admins', function (Blueprint $table) {
             $table->id();
             $table->string('nombre_completo', 50);
-            $table->string('telefono1', 15)->nullable();
-            $table->string('telefono2', 15)->nullable();
+            $table->string('player_id', 250)->nullable();
+            $table->string('foto', 200)->nullable();
+            $table->unsignedBigInteger('user_id')->nullable()->unique();
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        Schema::table('admins', function (Blueprint $table) {
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
@@ -30,6 +35,6 @@ class Cliente extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Cliente');
+        Schema::dropIfExists('admins');
     }
 }

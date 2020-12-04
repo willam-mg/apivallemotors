@@ -65,20 +65,26 @@ class LoginController extends Controller{
             ],403);
         }
         $user = Auth::user();
-        if ($user->type != User::TYPE_ADMIN) {
-            return response()->json([
-                'message'=>'No tiene credenciales.',
-            ],403);
-        }
+        // if ($user->type != User::TYPE_ADMIN) {
+        //     return response()->json([
+        //         'message'=>'No tiene credenciales.',
+        //     ],403);
+        // }
+        // if ($user->type != User::TYPE_MECANICO) {
+        //     return response()->json([
+        //         'message'=>'No tiene credenciales.',
+        //     ],403);
+        // }
 
         $accessToken = $user->createToken('authToken')->accessToken;
         // $user = Auth::user();
         return response()->json([
             'id'=>$user->id,
-            'nombre_completo'=>$user->admin->nombre_completo,
+            'nombre_completo'=>$user->admin?$user->admin->nombre_completo:$user->mecanico->nombre_completo,
             'email'=>$user->email,
             'foto'=>$user->foto,
-            'accessToken'=>$accessToken
+            'accessToken'=>$accessToken,
+            'type'=>$user->type
         ]);
     }
 

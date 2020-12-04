@@ -17,6 +17,7 @@ class CreateAccesoriosTable extends Migration
             $table->id();
             $table->string('nombre',50);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

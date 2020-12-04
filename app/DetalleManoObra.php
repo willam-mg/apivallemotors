@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DetalleManoObra extends Model
 {
@@ -12,8 +13,10 @@ class DetalleManoObra extends Model
      * @var array
      */
     protected $fillable = [
-        'solicitud_trabajo_id',
+        // 'solicitud_trabajo_id',
+        'orden_id',
         'descripcion',
+        'precio',
         'fecha',
     ];
 

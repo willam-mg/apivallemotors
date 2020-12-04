@@ -52,9 +52,42 @@ Route::prefix('/orden')->group(function(){
     Route::middleware('auth:api')->post('/create', 'OrdenController@store');
     Route::middleware('auth:api')->get('/all', 'OrdenController@index');
     Route::middleware('auth:api')->get('/show/{id}', 'OrdenController@show');
-    // Route::middleware('auth:api')->put('/update/{id}', 'OrdenController@update');
+    Route::middleware('auth:api')->put('/update/{id}', 'OrdenController@update');
     Route::middleware('auth:api')->delete('/delete/{id}', 'OrdenController@delete');
     Route::middleware('auth:api')->delete('/restore/{id}', 'OrdenController@restore');
+    Route::middleware('auth:api')->post('/detalle/create', 'OrdenController@createDetalleRepuesto');
+    Route::middleware('auth:api')->post('/detalle/manoobra', 'OrdenController@createDetalleManoObra');
+});
+
+//ordenes
+Route::prefix('/accesorio')->group(function(){
+    Route::middleware('auth:api')->post('/create', 'AccesorioController@store');
+    Route::middleware('auth:api')->get('/all', 'AccesorioController@index');
+    Route::middleware('auth:api')->get('/todos', 'AccesorioController@todos');
+    Route::middleware('auth:api')->get('/show/{id}', 'AccesorioController@show');
+    Route::middleware('auth:api')->put('/update/{id}', 'AccesorioController@update');
+    Route::middleware('auth:api')->delete('/delete/{id}', 'AccesorioController@delete');
+    Route::middleware('auth:api')->delete('/restore/{id}', 'AccesorioController@restore');
+});
+
+//ordenes
+Route::prefix('/repuesto')->group(function(){
+    Route::middleware('auth:api')->post('/create', 'RepuestoController@store');
+    Route::middleware('auth:api')->get('/all', 'RepuestoController@index');
+    Route::middleware('auth:api')->get('/show/{id}', 'RepuestoController@show');
+    Route::middleware('auth:api')->put('/update/{id}', 'RepuestoController@update');
+    Route::middleware('auth:api')->delete('/delete/{id}', 'RepuestoController@delete');
+    Route::middleware('auth:api')->delete('/restore/{id}', 'RepuestoController@restore');
+});
+
+//ordenes
+Route::prefix('/accesorio')->group(function(){
+    Route::middleware('auth:api')->post('/create', 'AccesorioController@store');
+    Route::middleware('auth:api')->get('/all', 'AccesorioController@index');
+    Route::middleware('auth:api')->get('/show/{id}', 'AccesorioController@show');
+    Route::middleware('auth:api')->put('/update/{id}', 'AccesorioController@update');
+    Route::middleware('auth:api')->delete('/delete/{id}', 'AccesorioController@delete');
+    Route::middleware('auth:api')->delete('/restore/{id}', 'AccesorioController@restore');
 });
 
 

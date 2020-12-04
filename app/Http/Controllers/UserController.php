@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\User;
+use App\Mecanico;
 use App\Codigo;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -18,17 +19,18 @@ use Carbon\Carbon;
 /**
  * @group  User
  *
- * Un usuario puede ser de tipo Admin, Paciente y Medico
+ * Un usuario puede ser de tipo Admin y Mecanico
  */
 class UserController extends Controller
 {
     private function getUser($user){
         return [
             'id'=>$user->id,
-            'nombre_completo'=>$user->admin->nombre_completo,
-            'player_id'=>$user->admin->player_id,
+            'nombre_completo'=>$user->admin?$user->admin->nombre_completo:$user->mecanico->nombre_completo,
+            'player_id'=>$user->admin?$user->admin->player_id:null,
             'email'=>$user->email,
-            'foto'=>$user->foto,
+            'foto'=>$user->admin?$user->foto:$user->mecanico->foto,
+            'type'=>$user->type,
         ];
     }
 
@@ -49,9 +51,7 @@ class UserController extends Controller
      * muestra la lista de uuarios de tipo admin
      */
     public function index(){
-        $usuarios = User::where([
-            'type'=>User::TYPE_ADMIN,
-        ])->paginate(5);
+        $usuarios = User::paginate(5);
         return view('user/index', compact('usuarios'));
     }
 
@@ -92,133 +92,49 @@ class UserController extends Controller
             $user = User::find($id);
         }
 
-        $imageName = $user->admin->foto;
-        $image = $request->file('foto');
-        if ($image){
-            $imageExist = 'uploads/'.$user->admin->foto;
-            if ( $user->admin->foto && file_exists($imageExist) ){
-                unlink($imageExist);
+        if ($user->type == User::TYPE_ADMIN){
+            $imageName = $user->admin->foto;
+            $image = $request->file('foto');
+            if ($image){
+                $imageExist = 'uploads/'.$user->admin->foto;
+                if ( $user->admin->foto && file_exists($imageExist) ){
+                    unlink($imageExist);
+                }
+                $imageName = 'user_'.$user->id.date('ymdHis').'.'.$image->getClientOriginalExtension();
+                $image->move('uploads', $imageName);
             }
-            $imageName = 'user_'.$user->id.date('ymdHis').'.'.$image->getClientOriginalExtension();
-            $image->move('uploads', $imageName);
+    
+            
+            $user->email = $request->email;
+            $user->admin->nombre_completo = $request->nombre_completo;
+            $user->admin->foto = $imageName;
+            $user->admin->save();
+        }else{
+            $imageName = $user->mecanico->src_foto;
+            $image = $request->file('foto');
+            if ($image){
+                $imageExist = 'uploads/'.$user->mecanico->src_foto;
+                if ( $user->mecanico->src_foto && file_exists($imageExist) ){
+                    unlink($imageExist);
+                }
+                $imageName = 'mecanico_'.$user->mecanico->id.date('ymdHis').'.'.$image->getClientOriginalExtension();
+                $image->move('uploads', $imageName);
+            }
+    
+            
+            $user->email = $request->email;
+            $user->mecanico->nombre_completo = $request->nombre_completo;
+            $user->mecanico->src_foto = $imageName;
+            $user->mecanico->save();
+            $user->save();
         }
-
-        
-        $user->email = $request->email;
-        $user->admin->nombre_completo = $request->nombre_completo;
-        $user->admin->foto = $imageName;
-        $user->admin->save();
-        $user->save();
+       
 
         return view('user/profile', compact('user', 'id'));
     }
 
     /**
      * Admin list
-     * 
-     * Obtiene la lista de usuarios de tipo admin.
-     * filter = {
-     *      "nombre_completo":"",
-     *      "email":""
-     * }
-     * 
-     * @urlParam filter Object
-     * 
-     * @response {
-     *     "current_page": 1,
-     *     "data": [
-     *         {
-     *             "id": 2,
-     *             "email": "admin@admin.com",
-     *             "nombre_completo": "admin",
-     *             "foto": "http:\/\/pacientemedico.ds:998\/uploads\/user_2200608000357.jpg",
-     *             "matricula": null,
-     *             "admin": {
-     *                 "id": 1,
-     *                 "nombre_completo": "admin",
-     *                 "foto": "user_2200608000357.jpg",
-     *                 "created_at": "2020-06-05T18:46:17.000000Z",
-     *                 "updated_at": "2020-06-08T00:03:57.000000Z",
-     *                 "deleted_at": null
-     *             },
-     *             "medico": null
-     *         },
-     *         {
-     *             "id": 5,
-     *             "email": "gato@gmail.com",
-     *             "nombre_completo": "gato con botas",
-     *             "foto": "http:\/\/pacientemedico.ds:998\/uploads\/user_5200608223855.jpg",
-     *             "matricula": null,
-     *             "admin": {
-     *                 "id": 2,
-     *                 "nombre_completo": "gato con botas",
-     *                 "foto": "user_5200608223855.jpg",
-     *                 "created_at": "2020-06-08T00:05:34.000000Z",
-     *                 "updated_at": "2020-06-08T22:38:55.000000Z",
-     *                 "deleted_at": null
-     *             },
-     *             "medico": null
-     *         },
-     *         {
-     *             "id": 6,
-     *             "email": "melania@gmail.com",
-     *             "nombre_completo": "melani tromp de lavaldes",
-     *             "foto": "http:\/\/pacientemedico.ds:998\/uploads\/user_6200608001120.jpg",
-     *             "matricula": null,
-     *             "admin": {
-     *                 "id": 3,
-     *                 "nombre_completo": "melani tromp de lavaldes",
-     *                 "foto": "user_6200608001120.jpg",
-     *                 "created_at": "2020-06-08T00:11:20.000000Z",
-     *                 "updated_at": "2020-06-08T00:11:20.000000Z",
-     *                 "deleted_at": null
-     *             },
-     *             "medico": null
-     *         },
-     *         {
-     *             "id": 7,
-     *             "email": "drama@gmail.com",
-     *             "nombre_completo": "drama",
-     *             "foto": "http:\/\/pacientemedico.ds:998\/uploads\/user_7200608002049.jpg",
-     *             "matricula": null,
-     *             "admin": {
-     *                 "id": 4,
-     *                 "nombre_completo": "drama",
-     *                 "foto": "user_7200608002049.jpg",
-     *                 "created_at": "2020-06-08T00:13:36.000000Z",
-     *                 "updated_at": "2020-06-08T00:20:49.000000Z",
-     *                 "deleted_at": null
-     *             },
-     *             "medico": null
-     *         },
-     *         {
-     *             "id": 8,
-     *             "email": "sandra@gmail.com",
-     *             "nombre_completo": "sandra mamani garcia",
-     *             "foto": "http:\/\/pacientemedico.ds:998\/uploads\/user_8200608002035.jpg",
-     *             "matricula": null,
-     *             "admin": {
-     *                 "id": 5,
-     *                 "nombre_completo": "sandra mamani garcia",
-     *                 "foto": "user_8200608002035.jpg",
-     *                 "created_at": "2020-06-08T00:15:20.000000Z",
-     *                 "updated_at": "2020-06-08T00:20:35.000000Z",
-     *                 "deleted_at": null
-     *             },
-     *             "medico": null
-     *         }
-     *     ],
-     *     "first_page_url": "http:\/\/pacientemedico.ds:998\/api\/admin\/list?page=1",
-     *     "from": 1,
-     *     "last_page": 2,
-     *     "last_page_url": "http:\/\/pacientemedico.ds:998\/api\/admin\/list?page=2",
-     *     "next_page_url": "http:\/\/pacientemedico.ds:998\/api\/admin\/list?page=2",
-     *     "path": "http:\/\/pacientemedico.ds:998\/api\/admin\/list",
-     *     "per_page": "5",
-     *     "prev_page_url": null,
-     *     "to": 5,
-     *     "total": 9
-     * }
      */
     public function apiList( Request $request){
         if ($request->has('filter') && $request->filter != 'null' && $request->filter != null){
@@ -227,18 +143,14 @@ class UserController extends Controller
             if($filter['nombre_completo'] != "" || $filter['email'] != ""){
                 $page = 1;
             }
-            $usuarios = User::where('type', User::TYPE_ADMIN)
-                ->where('admins.nombre_completo', 'like', $filter['nombre_completo'].'%')
+            $usuarios = User::where('admins.nombre_completo', 'like', $filter['nombre_completo'].'%')
                 ->where('users.email', 'like', '%'.$filter['email'].'%')
                 ->select('users.id', 'users.email', 'admins.nombre_completo', 'admins.foto')
                 ->join('admins', 'users.id', '=', 'admins.user_id')
                 ->orderBy('id', 'desc')
                 ->paginate($request->per_page?:5, ['*'], 'page', $page);
         }else{
-            $usuarios = User::where([
-                'type'=>User::TYPE_ADMIN,
-            ])
-            ->select('users.id', 'users.email', 'admins.nombre_completo', 'admins.foto')
+            $usuarios = User::select('users.id', 'users.email', 'admins.nombre_completo', 'admins.foto')
             ->join('admins', 'users.id', '=', 'admins.user_id')
             ->orderBy('id', 'desc')
             ->paginate($request->per_page?:5);
@@ -319,23 +231,42 @@ class UserController extends Controller
                 }
             }
 
-            $imageName = $user->admin->foto;
-            if ($request->has('foto') && $request->foto !== null){
-                $imageExist = 'uploads/'.$user->admin->foto;
-                if ( $user->admin->foto && file_exists($imageExist) ){
-                    unlink($imageExist);
+            if ($user->type == User::TYPE_ADMIN){
+                $imageName = $user->admin->foto;
+                if ($request->has('foto') && $request->foto !== null){
+                    $imageExist = 'uploads/'.$user->admin->foto;
+                    if ( $user->admin->foto && file_exists($imageExist) ){
+                        unlink($imageExist);
+                    }
+                    $image = $request->foto;
+                    $imageName = 'user_'.$user->id.date('ymdHis').'.jpg';
+                    $path = public_path().'/uploads/' . $imageName;
+                    Image::make(file_get_contents($image))->save($path);   
                 }
-                $image = $request->foto;
-                $imageName = 'user_'.$user->id.date('ymdHis').'.jpg';
-                $path = public_path().'/uploads/' . $imageName;
-                Image::make(file_get_contents($image))->save($path);   
+                
+                $user->admin->nombre_completo = $request->nombre_completo;
+                $user->admin->foto = $imageName;
+                $user->admin->save();
+                $user->email = $request->email;
+                $user->save();
+            }else{
+                $imageName = $user->mecanico->src_foto;
+                if ($request->has('foto') && $request->foto !== null){
+                    $imageExist = 'uploads/'.$user->mecanico->src_foto;
+                    if ( $user->mecanico->src_foto && file_exists($imageExist) ){
+                        unlink($imageExist);
+                    }
+                    $image = $request->foto;
+                    $imageName = 'user_'.$user->mecanico->id.date('ymdHis').'.jpg';
+                    $path = public_path().'/uploads/' . $imageName;
+                    Image::make(file_get_contents($image))->save($path);   
+                }
+                $user->mecanico->nombre_completo = $request->nombre_completo;
+                $user->mecanico->src_foto = $imageName;
+                $user->mecanico->save();
+                $user->email = $request->email;
+                $user->save();
             }
-            
-            $user->admin->nombre_completo = $request->nombre_completo;
-            $user->admin->foto = $imageName;
-            $user->admin->save();
-            $user->email = $request->email;
-            $user->save();
 
             DB::commit();
 

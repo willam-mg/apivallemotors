@@ -18,6 +18,7 @@ class CreateRepuestosTable extends Migration
             $table->string('nombre', 50);
             $table->decimal('precio', 8, 2);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

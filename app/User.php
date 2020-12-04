@@ -12,8 +12,7 @@ class User extends Authenticatable
 {
 
     const TYPE_ADMIN = 1;
-    const TYPE_PACIENTE = 2;
-    const TYPE_MEDICO = 3;
+    const TYPE_MECANICO = 2;
 
     use HasApiTokens, Notifiable, SoftDeletes;
 
@@ -44,7 +43,6 @@ class User extends Authenticatable
      */
     protected $appends = [
         'foto', 
-        'matricula'
     ];
 
     /**
@@ -56,20 +54,14 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    /**
-     * Get the phone record associated with the user.
-     */
-    public function paciente()
-    {
-        return $this->hasOne('App\Paciente');
-    }
+    
     
     /**
      * Get the phone record associated with the user.
      */
-    public function medico()
+    public function mecanico()
     {
-        return $this->hasOne('App\Medico');
+        return $this->hasOne('App\Mecanico');
     }
     
     /**
@@ -86,18 +78,10 @@ class User extends Authenticatable
                 return url('/').'/uploads/' . $this->admin->foto;
             }
         }
-        if ($this->paciente){
-            return $this->paciente->foto;
-        }
-        if ($this->medico){
-            return $this->medico->foto;
-        }
-        return null;
-    }
-    
-    public function getMatriculaAttribute(){
-        if ($this->medico){
-            return $this->medico->matricula;
+        if ($this->mecanico){
+            if ($this->mecanico->src_foto){
+                return $this->mecanico->foto;
+            }
         }
         return null;
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Mecanico;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +34,7 @@ class MecanicoController extends Controller
         return $model;
     }
 
-    private function format($model){
+    private function format($model, $accessToken = null){
         return [
             'id'=>$model->id,
             'nombre_completo'=>$model->nombre_completo,
@@ -45,6 +46,7 @@ class MecanicoController extends Controller
             'fecha_ingreso'=>$model->fecha_ingreso,
             'fecha_salida'=>$model->fecha_salida,
             'foto'=>$model->foto,
+            'accessToken'=>$accessToken,
         ];
     }
 
@@ -117,12 +119,22 @@ class MecanicoController extends Controller
                 'nombre_completo' => ['required'],
                 'ci' => ['required'],
                 'telefono' => ['required'],
+                'email' => ['required'],
+                'password' => ['required'],
             ]);
             
             if ( $validator->fails() ){
                 http_response_code(422);
                 throw new \Exception($validator->errors()->first());
             }
+
+            $user = User::create([
+                'type' => User::TYPE_MECANICO,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
+            // return $user;
 
             $imageName = null;
             $model = Mecanico::create([
@@ -135,6 +147,7 @@ class MecanicoController extends Controller
                 'fecha_ingreso' => $request->fecha_ingreso,
                 'fecha_salida' => $request->fecha_salida,
                 'src_foto' => $imageName,
+                'user_id' => $user->id,
             ]);
 
             if ($request->has('foto') && $request->foto !== null){
@@ -146,9 +159,12 @@ class MecanicoController extends Controller
             $model->src_foto = $imageName;
             $model->save();
 
+            // DB::commit();
+            // return response()->json($this->format($model), 201);
+            $accessToken = $user->createToken('authToken')->accessToken;
             DB::commit();
 
-            return response()->json($this->format($model), 201);
+            return response()->json($this->format($user, $accessToken), 201);
 
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -156,7 +172,7 @@ class MecanicoController extends Controller
         }        
     }
     
-    public function update(Request $request){
+    public function update($id, Request $request){
         DB::beginTransaction();
         try {
             $model = $this->getModel($id);
@@ -172,13 +188,16 @@ class MecanicoController extends Controller
                 throw new \Exception($validator->errors()->first());
             }
 
-            if ($image){
+            $imageName = $model->foto;
+            if ($request->has('foto') && $request->foto !== null){
                 $imageExist = 'uploads/'.$model->foto;
                 if ( $model->foto && file_exists($imageExist) ){
                     unlink($imageExist);
                 }
-                $imageName = 'user_'.$model->id.date('ymdHis').'.'.$image->getClientOriginalExtension();
-                $image->move('uploads', $imageName);
+                $image = $request->foto;
+                $imageName = 'mecanico_'.$model->id.date('ymdHis').'.jpg';
+                $path = public_path().'/uploads/' . $imageName;
+                Image::make(file_get_contents($image))->save($path);   
             }
 
             $model->nombre_completo = $request->nombre_completo;
@@ -190,6 +209,7 @@ class MecanicoController extends Controller
             $model->fecha_ingreso = $request->fecha_ingreso;
             $model->fecha_salida = $request->fecha_salida;
             $model->src_foto = $imageName;
+            $model->save();
 
             DB::commit();
 
