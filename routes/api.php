@@ -45,6 +45,7 @@ Route::prefix('/mecanico')->group(function(){
     Route::middleware('auth:api')->put('/update/{id}', 'MecanicoController@update');
     Route::middleware('auth:api')->delete('/delete/{id}', 'MecanicoController@delete');
     Route::middleware('auth:api')->delete('/restore/{id}', 'MecanicoController@restore');
+    Route::middleware('auth:api')->get('/todos', 'MecanicoController@todos');
 });
 
 //ordenes
@@ -56,7 +57,16 @@ Route::prefix('/orden')->group(function(){
     Route::middleware('auth:api')->delete('/delete/{id}', 'OrdenController@delete');
     Route::middleware('auth:api')->delete('/restore/{id}', 'OrdenController@restore');
     Route::middleware('auth:api')->post('/detalle/create', 'OrdenController@createDetalleRepuesto');
+    // mano de obra
     Route::middleware('auth:api')->post('/detalle/manoobra', 'OrdenController@createDetalleManoObra');
+    Route::middleware('auth:api')->put('/detalle/editmanoobra/{id}', 'OrdenController@editDetalleManoObra');
+    Route::middleware('auth:api')->delete('/detalle/deletemanoobra/{id}', 'OrdenController@deleteDetalleManoObra');
+    Route::middleware('auth:api')->delete('/detalle/restoremanoobra/{id}', 'OrdenController@restoreDetalleManoObra');
+    // repuestos
+    Route::middleware('auth:api')->post('/detalle/add-repuesto', 'OrdenController@createDetalleRepuesto');
+    Route::middleware('auth:api')->put('/detalle/edit-repuesto/{id}', 'OrdenController@editDetalleRepuesto');
+    Route::middleware('auth:api')->delete('/detalle/delete-repuesto/{id}', 'OrdenController@deleteDetalleRepuesto');
+    Route::middleware('auth:api')->delete('/detalle/restore-repuesto/{id}', 'OrdenController@restoreDetalleRepuesto');
 });
 
 //ordenes
@@ -71,14 +81,14 @@ Route::prefix('/accesorio')->group(function(){
 });
 
 //ordenes
-Route::prefix('/repuesto')->group(function(){
-    Route::middleware('auth:api')->post('/create', 'RepuestoController@store');
-    Route::middleware('auth:api')->get('/all', 'RepuestoController@index');
-    Route::middleware('auth:api')->get('/show/{id}', 'RepuestoController@show');
-    Route::middleware('auth:api')->put('/update/{id}', 'RepuestoController@update');
-    Route::middleware('auth:api')->delete('/delete/{id}', 'RepuestoController@delete');
-    Route::middleware('auth:api')->delete('/restore/{id}', 'RepuestoController@restore');
-});
+// Route::prefix('/repuesto')->group(function(){
+//     Route::middleware('auth:api')->post('/create', 'RepuestoController@store');
+//     Route::middleware('auth:api')->get('/all', 'RepuestoController@index');
+//     Route::middleware('auth:api')->get('/show/{id}', 'RepuestoController@show');
+//     Route::middleware('auth:api')->put('/update/{id}', 'RepuestoController@update');
+//     Route::middleware('auth:api')->delete('/delete/{id}', 'RepuestoController@delete');
+//     Route::middleware('auth:api')->delete('/restore/{id}', 'RepuestoController@restore');
+// });
 
 //ordenes
 Route::prefix('/accesorio')->group(function(){

@@ -17,7 +17,7 @@ class CreateDetalleManoObrasTable extends Migration
             $table->id();
             $table->unsignedBigInteger('orden_id');
             $table->string('descripcion', 500);
-            $table->decimal('precio', 10, 2);
+            $table->decimal('precio', 10, 2)->nullable()->default(0);
             $table->date('fecha');
             $table->timestamps();
             $table->softDeletes();

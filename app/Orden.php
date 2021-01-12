@@ -3,13 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Repuesto;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Orden extends Model
 {
     
-
+    use SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *
@@ -21,8 +20,6 @@ class Orden extends Model
         'solicitud',
         'tanque',
         'estado_vehiculo_otros',
-        'fecha_ingreso',
-        'hora_ingreso',
         'fecha_salida',
         'hora_salida',
         'mecanico_id',
@@ -40,21 +37,6 @@ class Orden extends Model
         'modelo',
         'color',
         'ano',
-
-        'tapa_ruedas',
-        'llanta_auxilio',
-        'gata_hidraulica',
-        'llave_cruz',
-        'pisos',
-        'limpia_parabrisas',
-        'tapa_tanque',
-        'herramientas',
-        'mangueras',
-        'espejos',
-        'tapa_cubos',
-        'antena',
-        'radio',
-        'focos',
         'src_foto',
     ];
 
@@ -77,9 +59,9 @@ class Orden extends Model
     /**
      * Get the vehiculo
      */
-    public function vehiculo()
+    public function mecanico()
     {
-        return $this->belongsTo('App\Vehiculo');
+        return $this->belongsTo('App\Mecanico');
     }
 
     /**
@@ -90,25 +72,24 @@ class Orden extends Model
         return $this->hasMany('App\DetalleRepuesto', 'orden_id', 'id');
     }
 
-    /**
-     * Get the repuestos
-     */
-    public function getRepuestos()
-    {
-        $detalle = $this->repuestos;
-        $res = [];
-        foreach ($detalle as $key => $det) {
-            array_push($res, [
-                'id'=>$det->id,
-                'repuesto_id'=>$det->repuesto_id,
-                'repuesto'=>$det->repuesto,
-                'nombre'=>$det->repuesto->nombre,
-                'precio'=>$det->precio,
-            ]);
-        }
-        return $res;
-
-    }
+    // /**
+    //  * Get the repuestos
+    //  */
+    // public function getRepuestos()
+    // {
+    //     $detalle = $this->repuestos;
+    //     $res = [];
+    //     foreach ($detalle as $key => $det) {
+    //         array_push($res, [
+    //             'id'=>$det->id,
+    //             'repuesto_id'=>$det->repuesto_id,
+    //             'repuesto'=>$det->repuesto,
+    //             'nombre'=>$det->repuesto->nombre,
+    //             'precio'=>$det->precio,
+    //         ]);
+    //     }
+    //     return $res;
+    // }
 
     /**
      * the appends attributes for accesors.
@@ -141,6 +122,22 @@ class Orden extends Model
     public function estadoVehiculo()
     {
         return $this->hasMany('App\EstadoVehiculo', 'orden_id', 'id');
+    }
+
+    public function getTotalRepuestos(){
+        $total = 0;
+        foreach ($this->repuestos as $key => $repuesto) {
+            $total += $repuesto->precio;
+        }
+        return $total;
+    }
+
+    public function getTotalManoObra(){
+        $total = 0;
+        foreach ($this->detalleManoObra as $key => $detalle) {
+            $total += $detalle->precio;
+        }
+        return $total;
     }
 
     

@@ -278,4 +278,7 @@ class MecanicoController extends Controller
         }
         return $rows;
     }
+    public function todos(Request $request){
+        return Mecanico::orderBy('id', 'desc')->get();
+    }
 }

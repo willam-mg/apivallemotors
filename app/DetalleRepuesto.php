@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DetalleRepuesto extends Model
 {
+    use SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *
@@ -15,7 +16,7 @@ class DetalleRepuesto extends Model
     protected $fillable = [
         // 'solicitud_trabajo_id',
         'orden_id',
-        'repuesto_id',
+        'repuesto',
         'precio',
         'fecha',
     ];
@@ -35,14 +36,6 @@ class DetalleRepuesto extends Model
      */
     protected $hidden = [
     ];
-
-    /**
-     * Get the user.
-     */
-    public function repuesto()
-    {
-        return $this->belongsTo('App\repuesto');
-    }
     
     /**
      * Get the user.

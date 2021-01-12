@@ -15,14 +15,14 @@ class CreateOrdensTable extends Migration
     {
         Schema::create('ordens', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('vehiculo_id')->nullable()->comment('vehiculo');
+            // $table->unsignedBigInteger('vehiculo_id')->nullable()->comment('vehiculo');
             $table->date('fecha')->nullable()->comment('fecha de creacion de la orden');
             $table->string('solicitud', 500)->comment('solicitud de trabajo del cliente');
             $table->string('tanque', 50)->nullable()->comment('capacidad del tanque dle vehiculo');
             // detalle del estado del vehiculo
             $table->string('estado_vehiculo_otros', 500)->nullable()->comment('otros objetos que se quedan dentro del vehiculo');
-            $table->date('fecha_ingreso')->nullable();
-            $table->time('hora_ingreso')->nullable();
+            // $table->date('fecha_ingreso')->nullable();
+            // $table->time('hora_ingreso')->nullable();
             $table->date('fecha_salida')->nullable();
             $table->time('hora_salida')->nullable();
             // responsable
@@ -45,20 +45,20 @@ class CreateOrdensTable extends Migration
             $table->string('ano', 50)->nullable();
 
             // accesorios detalle estado del vehiculo
-            $table->tinyInteger('tapa_ruedas')->default('0');
-            $table->tinyInteger('llanta_auxilio')->default('0');
-            $table->tinyInteger('gata_hidraulica')->default('0');
-            $table->tinyInteger('llave_cruz')->default('0');
-            $table->tinyInteger('pisos')->default('0');
-            $table->tinyInteger('limpia_parabrisas')->default('0');
-            $table->tinyInteger('tapa_tanque')->default('0');
-            $table->tinyInteger('herramientas')->default('0');
-            $table->tinyInteger('mangueras')->default('0');
-            $table->tinyInteger('espejos')->default('0');
-            $table->tinyInteger('tapa_cubos')->default('0');
-            $table->tinyInteger('antena')->default('0');
-            $table->tinyInteger('radio')->default('0');
-            $table->tinyInteger('focos')->default('0');
+            // $table->tinyInteger('tapa_ruedas')->default('0');
+            // $table->tinyInteger('llanta_auxilio')->default('0');
+            // $table->tinyInteger('gata_hidraulica')->default('0');
+            // $table->tinyInteger('llave_cruz')->default('0');
+            // $table->tinyInteger('pisos')->default('0');
+            // $table->tinyInteger('limpia_parabrisas')->default('0');
+            // $table->tinyInteger('tapa_tanque')->default('0');
+            // $table->tinyInteger('herramientas')->default('0');
+            // $table->tinyInteger('mangueras')->default('0');
+            // $table->tinyInteger('espejos')->default('0');
+            // $table->tinyInteger('tapa_cubos')->default('0');
+            // $table->tinyInteger('antena')->default('0');
+            // $table->tinyInteger('radio')->default('0');
+            // $table->tinyInteger('focos')->default('0');
 
             $table->string('src_foto', 100)->nullable();
 
@@ -67,7 +67,7 @@ class CreateOrdensTable extends Migration
         });
 
         Schema::table('ordens', function (Blueprint $table) {
-            $table->foreign('vehiculo_id')->references('id')->on('vehiculos');
+            // $table->foreign('vehiculo_id')->references('id')->on('vehiculos');
             $table->foreign('mecanico_id')->references('id')->on('mecanicos');
         });
     }

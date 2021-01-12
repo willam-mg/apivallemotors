@@ -3,12 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Cliente;
-use App\Vehiculo;
 use App\Mecanico;
 use App\Orden;
 use App\SolicitudTrabajo;
-use App\Repuesto;
 use App\DetalleRepuesto;
 use App\DetalleManoObra;
 use App\EstadoVehiculo;
@@ -45,37 +42,23 @@ class OrdenController extends Controller
 
             'tanque'=>$model->tanque,
             'solicitud'=>$model->solicitud,
-            // estado del vehiculo
-            // 'estadoVehiculo'=>$model->estadoVehiculo,
-
-            'tapa_ruedas'=>$model->tapa_ruedas,
-            'llanta_auxilio'=>$model->llanta_auxilio,
-            'gata_hidraulica'=>$model->gata_hidraulica,
-            'llave_cruz'=>$model->llave_cruz,
-            'pisos'=>$model->pisos,
-            'limpia_parabrisas'=>$model->limpia_parabrisas,
-            'tapa_tanque'=>$model->tapa_tanque,
-            'herramientas'=>$model->herramientas,
-            'mangueras'=>$model->mangueras,
-            'espejos'=>$model->espejos,
-            'tapa_cubos'=>$model->tapa_cubos,
-            'antena'=>$model->antena,   
-            'radio'=>$model->radio,
-            'focos'=>$model->focos,
 
             'estado_vehiculo_otros'=>$model->estado_vehiculo_otros,
+            'estadoVehiculo'=>$model->estadoVehiculo,
             'responsable'=>$model->responsable,
-            'mecanico_id'=>$model->responsable,
+            'mecanico_id'=>$model->mecanico_id,
+            'mecanico'=>$model->mecanico,
 
-            'fecha_ingreso'=>$model->fecha_ingreso,
             'fecha_salida'=>$model->fecha_salida,
             'km_actual'=>$model->km_actual,
             'proximo_cambio'=>$model->proximo_cambio,
-            'pago'=>$model->pago,
+            'pago'=>$model->pago == 1?'efectivo': 'cheque',
             'detalle_pago'=>$model->detalle_pago,
             'estado'=>$model->estado,
-            'repuestos'=>$model->getRepuestos(),
+            'repuestos'=>$model->repuestos,
+            'totalRepuesto'=>$model->getTotalRepuestos(),
             'manosobra'=>$model->detalleManoObra,
+            'totalManoObra'=>$model->getTotalManoObra(),
             'foto'=>$model->foto,
         ];
     }
@@ -112,34 +95,6 @@ class OrdenController extends Controller
                 throw new \Exception($validator->errors()->first());
             }
 
-            // // registro de cliente
-            // $cliente = Cliente::where('nombre_completo', $request->nombre_completo)->first();
-            // if (!$cliente){
-            //     $cliente = new Cliente;
-            //     $cliente->nombre_completo = $request->nombre_completo;
-            //     $cliente->telefono1 = $request->telefono1;
-            //     $cliente->telefono2 = $request->telefono2;
-            //     $cliente->save();
-            // }
-
-            // // registro de vehiculo
-            // $vehiculo = Vehiculo::where('vehiculo', $request->vehiculo)
-            //     ->where('placa', $request->placa)
-            //     ->where('modelo', $request->modelo)
-            //     ->where('color', $request->color)
-            //     ->where('ano', $request->ano)
-            //     ->first();
-            // if (!$vehiculo){
-            //     $vehiculo = new Vehiculo;
-            //     $vehiculo->cliente_id = $cliente->id;
-            //     $vehiculo->vehiculo = $request->vehiculo;
-            //     $vehiculo->placa = $request->placa;
-            //     $vehiculo->modelo = $request->modelo;
-            //     $vehiculo->color = $request->color;
-            //     $vehiculo->ano = $request->ano;
-            //     $vehiculo->save();
-            // }
-
             $imageName = null;
             $model = Orden::create([
                 'propietario'=>$request->propietario,
@@ -153,23 +108,7 @@ class OrdenController extends Controller
                 'tanque'=>$request->tanque,
                 'solicitud'=>$request->solicitud,
                 'estado_vehiculo_otros'=>$request->estado_vehiculo_otros,
-                'fecha_ingreso'=>Carbon::now()->format('Y-m-d'),
-                'hora_ingreso'=>Carbon::now()->format('H:i:s'),
                 'estado'=>0,
-                // 'tapa_ruedas'=> $request->tapa_ruedas,
-                // 'llanta_auxilio'=> $request->llanta_auxilio,
-                // 'gata_hidraulica'=> $request->gata_hidraulica,
-                // 'llave_cruz'=> $request->llave_cruz,
-                // 'pisos'=> $request->pisos,
-                // 'limpia_parabrisas'=> $request->limpia_parabrisas,
-                // 'tapa_tanque'=> $request->tapa_tanque,
-                // 'herramientas'=> $request->herramientas,
-                // 'mangueras'=> $request->mangueras,
-                // 'espejos'=> $request->espejos,
-                // 'tapa_cubos'=> $request->tapa_cubos,
-                // 'antena'=> $request->antena,
-                // 'radio'=> $request->radio,
-                // 'focos'=> $request->focos,
                 'src_foto' => $imageName,
             ]);
 
@@ -201,54 +140,13 @@ class OrdenController extends Controller
         }        
     }
 
-    function createDetalleRepuesto(Request $request){
-        DB::beginTransaction();
-        try {
-            $validator = Validator::make($request->all(), [
-                'solicitud_trabajo_id' => ['required'],
-                'detalle' => ['required'],
-            ]);
-            
-            if ( $validator->fails() ){
-                http_response_code(422);
-                throw new \Exception($validator->errors()->first());
-            }
-
-            $model = Orden::find($request->solicitud_trabajo_id);
-            if(!$model){
-                throw new \Exception('no existe el repuesto');
-            }
-
-            $detalle = $request->detalle;
-            foreach ($detalle as $key => $det) {
-                $repuesto = Repuesto::find($det['repuesto_id']);
-                if(!$repuesto){
-                    throw new \Exception('no existe el repuesto');
-                }
-
-                $mdDetalleRepuesto = DetalleRepuesto::create([
-                    'orden_id'=>$model->id,
-                    'repuesto_id'=>$repuesto->id,
-                    'precio'=>$repuesto->precio,
-                    'fecha'=>Carbon::now()->format('Y-m-d'),
-                ]);
-            }
-
-            DB::commit();
-
-            return response()->json($this->format($model), 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return $this->formatError($th);
-        }        
-    }
     
     function createDetalleManoObra(Request $request){
         DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
-                'solicitud_trabajo_id' => ['required'],
-                'detalle' => ['required'],
+                'orden_id' => ['required'],
+                'descripcion' => ['required'],
             ]);
             
             if ( $validator->fails() ){
@@ -256,24 +154,195 @@ class OrdenController extends Controller
                 throw new \Exception($validator->errors()->first());
             }
 
-            $model = Orden::find($request->solicitud_trabajo_id);
+            $model = Orden::find($request->orden_id);
+            if(!$model){
+                throw new \Exception('no existe el repuesto');
+            }
+            DetalleManoObra::create([
+                'orden_id'=>$model->id,
+                'descripcion'=>$request->descripcion,
+                'precio'=>$request->precio?$request->precio:null,
+                'fecha'=>Carbon::now()->format('Y-m-d'),
+            ]);
+
+
+            DB::commit();
+
+            return response()->json($model, 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->formatError($th);
+        }        
+    }
+
+    function editDetalleManoObra($id, Request $request){
+        DB::beginTransaction();
+        try {
+            $validator = Validator::make($request->all(), [
+                'orden_id' => ['required'],
+                'descripcion' => ['required'],
+            ]);
+            
+            if ( $validator->fails() ){
+                http_response_code(422);
+                throw new \Exception($validator->errors()->first());
+            }
+
+            $model = DetalleManoObra::find($id);
+            if(!$model){
+                throw new \Exception('no existe el repuesto');
+            }
+            $model->descripcion = $request->descripcion;
+            $model->precio = $request->precio;
+            $model->fecha = Carbon::now()->format('Y-m-d');
+            $model->save();
+            
+            DB::commit();
+
+            return response()->json($model, 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->formatError($th);
+        }        
+    }
+
+
+    function editDetalleRepuesto($id, Request $request){
+        DB::beginTransaction();
+        try {
+            $validator = Validator::make($request->all(), [
+                'orden_id' => ['required'],
+                'repuesto' => ['required'],
+            ]);
+            
+            if ( $validator->fails() ){
+                http_response_code(422);
+                throw new \Exception($validator->errors()->first());
+            }
+
+            $model = DetalleRepuesto::find($id);
+            if(!$model){
+                throw new \Exception('no existe el repuesto');
+            }
+            $model->repuesto = $request->repuesto;
+            $model->precio = $request->precio;
+            $model->fecha = Carbon::now()->format('Y-m-d');
+            $model->save();
+            
+            DB::commit();
+
+            return response()->json($model, 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->formatError($th);
+        }        
+    }
+
+    function deleteDetalleManoObra($id, Request $request){
+        DB::beginTransaction();
+        try {
+            $model = DetalleManoObra::find($id);
+            $model->delete();
+            DB::commit();
+            return response()->json([
+                'message'=>'Eliminado correctamente',
+                'id'=>$id
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->formatError($th);
+        }        
+    }
+    function deleteDetalleRepuesto($id, Request $request){
+        DB::beginTransaction();
+        try {
+            $model = DetalleRepuesto::find($id);
+            $model->delete();
+            DB::commit();
+            return response()->json([
+                'message'=>'Eliminado correctamente',
+                'id'=>$id
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->formatError($th);
+        }        
+    }
+    public function restoreDetalleManoObra($id, Request $request){
+        DB::beginTransaction();
+        try {
+            $model = DetalleManoObra::find($id);
+            if (!$model){
+                throw new \Exception('no existe el detalle '. $id);
+            }
+            $model->restore();
+            DB::commit();
+            return response()->json([
+                'message'=>'Restaurado correctamente',
+                'id'=>$id
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->formatError($th);
+        }
+    }
+    public function restoreDetalleRestore($id, Request $request){
+        DB::beginTransaction();
+        try {
+            $model = DetalleRepuesto::find($id);
+            if (!$model){
+                throw new \Exception('no existe el detalle '. $id);
+            }
+            $model->restore();
+            DB::commit();
+            return response()->json([
+                'message'=>'Restaurado correctamente',
+                'id'=>$id
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->formatError($th);
+        }
+    }
+
+
+
+
+
+
+
+
+
+    
+
+    function createDetalleRepuesto(Request $request){
+        DB::beginTransaction();
+        try {
+            $validator = Validator::make($request->all(), [
+                'orden_id' => ['required'],
+                'repuesto' => ['required'],
+            ]);
+            
+            if ( $validator->fails() ){
+                http_response_code(422);
+                throw new \Exception($validator->errors()->first());
+            }
+
+            $model = Orden::find($request->orden_id);
             if(!$model){
                 throw new \Exception('no existe el repuesto');
             }
 
-            $detalle = $request->detalle;
-            foreach ($detalle as $key => $det) {
-                $mdDetalleRepuesto = DetalleManoObra::create([
-                    'orden_id'=>$model->id,
-                    'descripcion'=>$det['descripcion'],
-                    'precio'=>$det['precio'],
-                    'fecha'=>Carbon::now()->format('Y-m-d'),
-                ]);
-            }
+            DetalleRepuesto::create([
+                'orden_id'=>$model->id,
+                'repuesto'=>$request->repuesto,
+                'precio'=>$request->precio?$request->precio:null,
+                'fecha'=>Carbon::now()->format('Y-m-d'),
+            ]);
 
             DB::commit();
 
-            return response()->json($this->format($model), 201);
+            return response()->json($model, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
             return $this->formatError($th);
@@ -320,28 +389,31 @@ class OrdenController extends Controller
             $model->color = $request->color;
             $model->ano = $request->ano;
             $model->fecha = $request->fecha;
+            $model->fecha_salida = $request->fecha_salida;
             $model->tanque = $request->tanque;
             $model->solicitud = $request->solicitud;
             $model->estado_vehiculo_otros = $request->estado_vehiculo_otros;
-            $model->fecha_ingreso = $request->fecha_ingreso;
-            $model->hora_ingreso = $request->hora_ingreso;
             $model->estado = $request->estado;
-            $model->tapa_ruedas = $request->tapa_ruedas;
-            $model->llanta_auxilio = $request->llanta_auxilio;
-            $model->gata_hidraulica = $request->gata_hidraulica;
-            $model->llave_cruz = $request->llave_cruz;
-            $model->pisos = $request->pisos;
-            $model->limpia_parabrisas = $request->limpia_parabrisas;
-            $model->tapa_tanque = $request->tapa_tanque;
-            $model->herramientas = $request->herramientas;
-            $model->mangueras = $request->mangueras;
-            $model->espejos = $request->espejos;
-            $model->tapa_cubos = $request->tapa_cubos;
-            $model->antena = $request->antena;
-            $model->radio = $request->radio;
-            $model->focos = $request->focos;
             $model->src_foto = $imageName;
+            $model->mecanico_id = $request->mecanico_id;
+            $model->pago = $request->pago == 'efectivo'?1:2;
+            $model->detalle_pago = $request->detalle_pago;
+            $model->km_actual = $request->km_actual;
+            $model->proximo_cambio = $request->proximo_cambio;
             $model->save();
+
+            foreach ($model->estadoVehiculo as $key => $estadoVeh) {
+                $estadoVeh->delete();
+            }
+
+            $arEstadoVehiculo = $request->estado_vehiculo;
+            foreach ($arEstadoVehiculo as $key => $element) {
+                $mdEstadoVehiculo = EstadoVehiculo::create([
+                    'orden_id'=>$model->id,
+                    'accesorio_id'=>$element['id'],
+                    'fecha'=>Carbon::now()->format('Y-m-d'),
+                ]);
+            }
 
             DB::commit();
 
@@ -397,11 +469,11 @@ class OrdenController extends Controller
     public function index(Request $request){
         if ($request->has('filter') && $request->filter != 'null' && $request->filter != null){
             $filter = json_decode($request->filter, true);
-            $page = $request->page;
+            $page = $request->page ? $request->page : 1;
             if($filter['propietario'] != "" || $filter['placa'] != "" || $filter['modelo'] != "" || $filter['color'] != "" || $filter['estado'] != ""){
-                $page = 1;
+                // $page = 1;
             }
-            if ( $filter['estado'] == null ){
+            if ( $filter['estado'] == 2 ){
                 $rows = Orden::where('propietario', 'like', '%'.$filter['propietario'].'%')
                     ->where('placa', 'like', '%'.$filter['placa'].'%')
                     ->where('modelo', 'like', '%'.$filter['modelo'].'%')
@@ -413,7 +485,7 @@ class OrdenController extends Controller
                     ->where('placa', 'like', '%'.$filter['placa'].'%')
                     ->where('modelo', 'like', '%'.$filter['modelo'].'%')
                     ->where('color', 'like', '%'.$filter['color'].'%')
-                    ->where(' estado', $filter['estado'])
+                    ->where('estado', $filter['estado'])
                     ->orderBy('id', 'desc')
                     ->paginate($request->per_page?:5, ['*'], 'page', $page);
             }

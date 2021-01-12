@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EstadoVehiculo extends Model
 {
+    use SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *
@@ -27,10 +28,30 @@ class EstadoVehiculo extends Model
     ];
 
     /**
+     * the appends attributes for accesors.
+     */
+    protected $appends = [
+        'mdaccesorio', 
+    ];
+
+    /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
      */
     protected $hidden = [
     ];
+
+    public function getMdaccesorioAttribute()
+    {
+        return $this->accesorio;
+    }
+    
+    /**
+     * Get the model one.
+     */
+    public function accesorio()
+    {
+        return $this->belongsTo('App\Accesorio');
+    }
 }
