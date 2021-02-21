@@ -33,6 +33,8 @@ class OrdenController extends Controller
             'id'=>$model->id,
             'propietario'=>$model->propietario,
             'telefono'=>$model->telefono,
+            'encargado'=>$model->encargado,
+            'telefono_encargado'=>$model->telefono_encargado,
             'fecha'=>$model->fecha,
             'vehiculo'=>$model->vehiculo,
             'placa'=>$model->placa,
@@ -99,6 +101,8 @@ class OrdenController extends Controller
             $model = Orden::create([
                 'propietario'=>$request->propietario,
                 'telefono'=>$request->telefono,
+                'encargado'=>$request->encargado,
+                'telefono_encargado'=>$request->telefono_encargado,
                 'vehiculo'=>$request->vehiculo,
                 'placa'=>$request->placa,
                 'modelo'=>$request->modelo,
@@ -383,6 +387,8 @@ class OrdenController extends Controller
 
             $model->propietario = $request->propietario;
             $model->telefono = $request->telefono;
+            $model->encargado = $request->encargado;
+            $model->telefono_encargado = $request->telefono_encargado;
             $model->vehiculo = $request->vehiculo;
             $model->placa = $request->placa;
             $model->modelo = $request->modelo;

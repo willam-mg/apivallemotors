@@ -31,6 +31,8 @@ class Orden extends Model
 
         'propietario',
         'telefono',
+        'encargado',
+        'telefono_encargado',
 
         'vehiculo',
         'placa',

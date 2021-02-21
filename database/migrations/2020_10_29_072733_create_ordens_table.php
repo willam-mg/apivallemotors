@@ -36,6 +36,8 @@ class CreateOrdensTable extends Migration
             // cliente
             $table->string('propietario', 50);
             $table->string('telefono', 50)->nullable();
+            $table->string('encargado', 50)->nullable()->comment('encargado de la empresa');
+            $table->string('telefono_encargado', 50)->nullable()->comment('telefono del ecargado de la empresa');
 
             //vehiculo
             $table->string('vehiculo', 50);
