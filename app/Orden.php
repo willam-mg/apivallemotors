@@ -28,12 +28,12 @@ class Orden extends Model
         'pago',
         'detalle_pago',
         'estado',
-
+        // cliente information
         'propietario',
         'telefono',
         'encargado',
         'telefono_encargado',
-
+        // vehiculo information
         'vehiculo',
         'placa',
         'modelo',
@@ -73,25 +73,6 @@ class Orden extends Model
     {
         return $this->hasMany('App\DetalleRepuesto', 'orden_id', 'id');
     }
-
-    // /**
-    //  * Get the repuestos
-    //  */
-    // public function getRepuestos()
-    // {
-    //     $detalle = $this->repuestos;
-    //     $res = [];
-    //     foreach ($detalle as $key => $det) {
-    //         array_push($res, [
-    //             'id'=>$det->id,
-    //             'repuesto_id'=>$det->repuesto_id,
-    //             'repuesto'=>$det->repuesto,
-    //             'nombre'=>$det->repuesto->nombre,
-    //             'precio'=>$det->precio,
-    //         ]);
-    //     }
-    //     return $res;
-    // }
 
     /**
      * the appends attributes for accesors.

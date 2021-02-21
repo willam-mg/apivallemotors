@@ -65,16 +65,6 @@ class LoginController extends Controller{
             ],403);
         }
         $user = Auth::user();
-        // if ($user->type != User::TYPE_ADMIN) {
-        //     return response()->json([
-        //         'message'=>'No tiene credenciales.',
-        //     ],403);
-        // }
-        // if ($user->type != User::TYPE_MECANICO) {
-        //     return response()->json([
-        //         'message'=>'No tiene credenciales.',
-        //     ],403);
-        // }
 
         $accessToken = $user->createToken('authToken')->accessToken;
         // $user = Auth::user();
