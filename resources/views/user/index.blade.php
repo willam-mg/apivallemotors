@@ -21,23 +21,25 @@
                             </thead>
                             <tbody>
                                 @foreach ($usuarios as $user)
-                                    <tr>
-                                        <td>
-                                            @if ($user->admin->foto)
-                                                <img src="{{'uploads/'.$user->admin->foto}}" alt="foto" width="40px" style="border-radius:50%" height="40px">
-                                            @else
-                                                <img src="img/no-image-user.png" alt="foto" width="40px" style="border-radius:50%" height="40px">
-                                            @endif
-                                        </td>
-                                        <td>{{$user->admin->nombre_completo}}</td>
-                                        <td>{{$user->email}}</td>
-                                        <td>
-                                            <a href="{{ route('profile', ['id' => $user->id]) }}" class="btn btn-info" title="Ver usuario">
-                                                <span class="fa fa-search"></span>
-                                                Ver
-                                            </a>
-                                        </td>
-                                    </tr>
+                                    @if ( $user->admin )
+                                        <tr>
+                                            <td>
+                                                @if ($user->admin->foto)
+                                                    <img src="{{'uploads/'.$user->admin->foto}}" alt="foto" width="40px" style="border-radius:50%" height="40px">
+                                                @else
+                                                    <img src="img/no-image-user.png" alt="foto" width="40px" style="border-radius:50%" height="40px">
+                                                @endif 
+                                            </td>
+                                            <td>{{$user->admin->nombre_completo}}</td>
+                                            <td>{{$user->email}}</td>
+                                            <td>
+                                                <a href="{{ route('profile', ['id' => $user->id]) }}" class="btn btn-info" title="Ver usuario">
+                                                    <span class="fa fa-search"></span>
+                                                    Ver
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>
