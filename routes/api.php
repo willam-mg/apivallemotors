@@ -63,6 +63,8 @@ Route::prefix('/orden')->group(function(){
     Route::middleware('auth:api')->put('/detalle/edit-repuesto/{id}', 'OrdenController@editDetalleRepuesto');
     Route::middleware('auth:api')->delete('/detalle/delete-repuesto/{id}', 'OrdenController@deleteDetalleRepuesto');
     Route::middleware('auth:api')->delete('/detalle/restore-repuesto/{id}', 'OrdenController@restoreDetalleRepuesto');
+    // ordenes similares del vehiculo
+    Route::middleware('auth:api')->get('/similares/{id}', 'OrdenController@ordenesSimilares');
 });
 
 //ordenes

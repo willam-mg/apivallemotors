@@ -500,4 +500,12 @@ class OrdenController extends Controller
         }
         return $rows;
     }
+
+    public function ordenesSimilares(Request $request, $id) {
+        $orden = Orden::find($id);
+        $page = $request->page ? $request->page : 1;
+        return Orden::where('placa', 'like', $orden->placa)
+                    ->orderBy('id', 'desc')
+                    ->paginate($request->per_page?:5, ['*'], 'page', $page);
+    }
 }
